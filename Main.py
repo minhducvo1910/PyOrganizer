@@ -7,6 +7,7 @@ import argparse
 from Scanner import scan
 from Organizer import organize
 from Cleaner import  find_duplicate, delete_duplicate
+from logger import log_scan, log_duplicate
 
 def main():
     parser = argparse.ArgumentParser(description="PyOrganizer - File Managemnet Tool")
@@ -30,6 +31,7 @@ def main():
     if args.scan:
         try:
             results = scan(scan_folder)
+            log_scan(scan_folder, len(results))   #NOTE: track the event in log file
             for result in results:
                 print(result)
         except ValueError as e:
@@ -40,8 +42,9 @@ def main():
         try:
             results = scan(organize_folder)
             organize(results)
+            print(f"Succesfully organized {len(results)} files!")
         except ValueError as e:
-            print(F"Error: {e}")
+            print(f"Error: {e}")
 
     #Call find_duplicate function
     elif args.duplicate:
@@ -49,12 +52,14 @@ def main():
             results = scan(duplicate_folder)
             duplicate_file = find_duplicate(results)
             if duplicate_file:
-                for file_hash, paths in duplicate_file.items():
+                log_duplicate(duplicate_folder, len(duplicate_file))
+                for _, paths in duplicate_file.items():
                     print(f"\nDuplicate group: ")
                     for path in paths:
                         print(f"  {path}")
             else:
                 print("No duplicate found!")
+            
         except ValueError as e:
             print(f"Error: {e}")
     
@@ -65,10 +70,13 @@ def main():
             duplicates = find_duplicate(results)
             if duplicates:
                 delete_duplicate(duplicates)
+                print(f"Successfully processed {len(duplicates)} duplicate groups!")
             else:
                 print(f"No duplicate found!")
         except ValueError as e:
             print(f"Error: {e}")
+
+
     else:
         parser.print_help()
 

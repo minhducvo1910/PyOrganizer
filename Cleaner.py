@@ -3,6 +3,7 @@ hash: a fingerprint for a file'''
 
 import hashlib
 import os
+from logger import log_deletion
 
 def get_hash(filepath):
     #Create a hasher obj using md5 algorithm
@@ -27,7 +28,7 @@ def find_duplicate(files):
     return {h: paths for h, paths in seen.items() if len(paths) > 1}  #NOTE: Only keep the hash with more than 1 paths
 
 def delete_duplicate(duplicates):
-    for file_hash, paths in duplicates.items():
+    for _, paths in duplicates.items():
         #Keep the first file, delete the rest
         original = paths[0]
         copies = paths[1:]
@@ -44,5 +45,6 @@ def delete_duplicate(duplicates):
                 print(f" Deleted {path}")
         else:
             pass
+        log_deletion(original_path= original, deleted_path=copies)
 
 

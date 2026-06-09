@@ -1,7 +1,7 @@
 '''Organizer: Take result from scan(), organize files and move files into organized subfolder'''
 import shutil
 from pathlib import Path
-
+from logger import log_organize
 Categories ={
     # Documents
     ".pdf": "Documents",
@@ -83,3 +83,4 @@ def organize(files):
         #Create folder and move file
         destination_folder.mkdir(exist_ok=True)
         shutil.move(file["path"], destination_folder / file["name"])
+        log_organize(file["name"], str(destination_folder))
