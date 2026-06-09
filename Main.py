@@ -6,7 +6,7 @@
 import argparse
 from Scanner import scan
 from Organizer import organize
-from Cleaner import  find_duplicate
+from Cleaner import  find_duplicate, delete_duplicate
 
 def main():
     parser = argparse.ArgumentParser(description="PyOrganizer - File Managemnet Tool")
@@ -16,12 +16,15 @@ def main():
 
     parser.add_argument("--duplicate", metavar="FOLDER", nargs="+", help="Find any duplicate files")
 
+    parser.add_argument("--delete-duplicate", metavar="FOLDER", nargs="+", help= "Delete any duplications")
+
     args = parser.parse_args()  #Read user input in the command line after main.py
 
     #NOTE: Organize path
     scan_folder = " ".join(args.scan) if args.scan else None                #Join words with space
     organize_folder = " ".join(args.organize) if args.organize else None
     duplicate_folder = " ".join(args.duplicate) if args.duplicate else None
+    delete_duplicate_folder = " ".join(args.delete_duplicate) if args.delete_duplicate else None
 
     #Call scan function
     if args.scan:
@@ -52,6 +55,18 @@ def main():
                         print(f"  {path}")
             else:
                 print("No duplicate found!")
+        except ValueError as e:
+            print(f"Error: {e}")
+    
+    #Delete any dupicate
+    elif args.delete_duplicate:
+        try:
+            results = scan(delete_duplicate_folder)
+            duplicates = find_duplicate(results)
+            if duplicates:
+                delete_duplicate(duplicates)
+            else:
+                print(f"No duplicate found!")
         except ValueError as e:
             print(f"Error: {e}")
     else:
