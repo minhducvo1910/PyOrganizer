@@ -23,6 +23,7 @@ Categories ={
     ".svg": "Images",
     ".webp": "Images",
     ".ico": "Images",
+    ".heic": "Images",
 
     # Videos
     ".mp4": "Videos",

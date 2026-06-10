@@ -4,11 +4,14 @@
     That --scan, --organize etc. are called flags or arguments'''
 
 import argparse
+from rich.console import Console
+from rich.table import Table 
 from Scanner import scan
 from Organizer import organize
 from Cleaner import  find_duplicate, delete_duplicate
 from logger import log_scan, log_duplicate
 
+console = Console()
 def main():
     parser = argparse.ArgumentParser(description="PyOrganizer - File Managemnet Tool")
     parser.add_argument("--scan", metavar="FOLDER", nargs="+", help= "Scan a folder and list files")
@@ -32,17 +35,37 @@ def main():
         try:
             results = scan(scan_folder)
             log_scan(scan_folder, len(results))   #NOTE: track the event in log file
-            for result in results:
-                print(result)
+
+            #Sorted date
+            sorted_result = sorted(results,
+                                key=lambda f: (f["extension"], -f["size_bytes"], f["modified_date"]),
+            )
+
+            #Rich table
+            table = Table(title=f"Scanned: {scan_folder}")
+            table.add_column("Name", style="cyan")
+            table.add_column("Extension", style="green")
+            table.add_column("Size (bytes)", style="yellow")
+            table.add_column("Modified date", style="magenta")
+
+            #Print table
+            for result in sorted_result:
+                table.add_row(
+                    result["name"],
+                    result["extension"],
+                    str(result["size_bytes"]),
+                    result["modified_date"]
+                )
+            console.print(table)
         except ValueError as e:
-            print(f"Error: {e}")
+            console.print(f"[red]Error: {e}[/red]")
 
     #Call organize function
     elif args.organize:
         try:
             results = scan(organize_folder)
             organize(results)
-            print(f"Succesfully organized {len(results)} files!")
+            console.print(f"[green]Succesfully organized {len(results)} files![/green]")
         except ValueError as e:
             print(f"Error: {e}")
 
@@ -54,14 +77,14 @@ def main():
             if duplicate_file:
                 log_duplicate(duplicate_folder, len(duplicate_file))
                 for _, paths in duplicate_file.items():
-                    print(f"\nDuplicate group: ")
+                    console.print(f"\n[yellow]Duplicate group:[/yellow] ")
                     for path in paths:
-                        print(f"  {path}")
+                        console.print(f"  [red]{path}[/red]")
             else:
-                print("No duplicate found!")
+                console.print("[green]No duplicate found![/green]")
             
         except ValueError as e:
-            print(f"Error: {e}")
+            console.print(f"[red]Error: {e}[/red]")
     
     #Delete any dupicate
     elif args.delete_duplicate:
@@ -70,11 +93,11 @@ def main():
             duplicates = find_duplicate(results)
             if duplicates:
                 delete_duplicate(duplicates)
-                print(f"Successfully processed {len(duplicates)} duplicate groups!")
+                console.print(f"[green]Successfully deleted {len(duplicates)} duplicate groups![/green]")
             else:
                 print(f"No duplicate found!")
         except ValueError as e:
-            print(f"Error: {e}")
+            console.print(f"[red]Error: {e}[/red]")
 
 
     else:
